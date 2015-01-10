@@ -1,6 +1,6 @@
 var express = require('express');
-var db = require('./db');
-var http = require('http');
+var db = require('./db/index.js');
+var mysql = require('mysql');
 
 // Middleware
 var morgan = require('morgan');
@@ -11,7 +11,6 @@ var router = require('./routes.js');
 
 var app = express();
 module.exports.app = app;
-var server = http.createServer(app);
 
 // Set what we are listening on.
 app.set("port", 3000);
@@ -23,8 +22,27 @@ app.use(parser.json());
 // Set up our routes
 app.use("/classes", router);
 
-// Serve the client files
 app.use(express.static(__dirname + "/../client"));
+
+app.get('/', function(req,res) {
+  res.render('../client/index.html');
+  console.log(req.method);
+  db.connection.query('SELECT * FROM users', function(err, rows, fields) {
+    if (err) throw err;
+    console.log(rows, fields);
+    });
+})
+
+app.post('/', function(req,res) {
+  // db.connection;
+  // db.connection.connect;
+  db.connection.query('INSERT into users (userid, username) VALUES (1, \'hou\')', function(err, rows, fields) {
+    if (err) throw err;
+    console.log(rows, fields);
+    });
+  // res.end('submitted');
+  // connection.end();
+})
 
 // If we are being run directly, run the server.
 if (!module.parent) {
