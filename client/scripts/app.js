@@ -105,7 +105,7 @@
 
 app = {
 
-    server: 'http://127.0.0.1:3000',
+    server: '//localhost:3000',
 
     init: function() {
       // console.log('running chatterbox');
@@ -141,20 +141,22 @@ app = {
 
     renderMessage: function(message){
       var $user = $("<div>", {class: 'user'}).text(message.username);
-      var $text = $("<div>", {class: 'text'}).text(message.text);
-      var $message = $("<div>", {class: 'chat', 'data-id': message.objectId }).append($user, $text);
+      var $text = $("<div>", {class: 'text'}).text(message.message);
+      var $message = $("<div>", {class: 'chat' }).append($user, $text);
       return $message;
     },
 
     displayMessage: function(message){
-      if( !app.onscreenMessages[message.objectId] ){
+      // if( !app.onscreenMessages[message.objectId] ){
+        console.log(message);
         var $html = app.renderMessage(message);
         $('#chats').prepend($html);
-        app.onscreenMessages[message.objectId] = true;
-      }
+        // app.onscreenMessages[message.objectId] = true;
+      // }
     },
 
     displayMessages: function(messages){
+      $('#chats').html('');
       for( var i = 0; i < messages.length; i++ ){
         app.displayMessage(messages[i]);
       }
@@ -162,13 +164,12 @@ app = {
 
     loadMsgs: function(){
       $.ajax({
-        url: app.server,
-        // type: 'GET',
-        data: { order: '-createdAt' },
+        url: app.server + '/classes/messages',
+        // data: { order: '-createdAt' },
         contentType: 'application/json',
         success: function(json){
-          console.log(json);
-          var showMessages = json.results;
+          // console.log(json);
+          var showMessages = JSON.parse(json);
           app.displayMessages(showMessages);
           console.log('successfully loaded');
         },
@@ -185,7 +186,7 @@ app = {
       app.startSpinner();
       $.ajax({
         type: 'POST',
-        url: app.server,
+        url: app.server + '/classes/messages',
         data: JSON.stringify(message),
         contentType: 'application/json',
         success: function(json){
