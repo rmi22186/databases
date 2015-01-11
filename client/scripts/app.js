@@ -102,37 +102,61 @@
 /////////////////////////////////////////////////////////////////////////////
 // jQuery-based Implementation of chatterbox client
 /////////////////////////////////////////////////////////////////////////////
+var username = window.prompt();
+
+var user = {
+  username: username
+};
 
 app = {
 
     server: '//localhost:3000',
 
+    sendUsername: function(username){
+      console.log(username)
+      $.ajax({
+        type: 'POST',
+        url: app.server + '/classes/users',
+        data: JSON.stringify(user), //JSON.stringify takes an object argument
+        contentType: 'application/json',
+        success: function(json){
+          console.log("Successfully sent!")
+        },
+        error: function() {
+          console.log('error sending username')
+        }
+      });
+    },
+
     init: function() {
       // console.log('running chatterbox');
       // Get username
-      app.username = window.location.search.substr(10);
-
+      app.username = username;
+      app.sendUsername(username);
       app.onscreenMessages = {};
 
       // cache some dom references
       app.$text = $('#message');
 
-      app.loadMsgs();
-      setInterval( app.loadMsgs.bind(app), 2000);
+      // app.loadMsgs();
+      // setInterval( app.loadMsgs.bind(app), 2000);
 
       $('#send').on('submit', app.handleSubmit);
     },
 
     handleSubmit: function(e){
       e.preventDefault();
-
+      // var userid = Math.floor(Math.random()*1000)
       var message = {
-        username: app.username,
-        text: app.$text.val(),
-        objectId: Math.floor(Math.random() * 10000).toString(),
-        createdAt: new Date(),
-        updateAt: new Date()
+
+        // messageid: Math.floor(Math.random()*1000),
+        // userid: userid,
+        message: app.$text.val()
+        // objectId: Math.floor(Math.random() * 10000).toString(),
+        // createdAt: new Date(),
+        // updateAt: new Date()
       };
+
 
       app.$text.val('');
 
@@ -140,7 +164,7 @@ app = {
     },
 
     renderMessage: function(message){
-      var $user = $("<div>", {class: 'user'}).text(message.username);
+      var $user = $("<div>", {class: 'user'}).text(window.username);
       var $text = $("<div>", {class: 'text'}).text(message.message);
       var $message = $("<div>", {class: 'chat' }).append($user, $text);
       return $message;
@@ -158,6 +182,7 @@ app = {
     displayMessages: function(messages){
       $('#chats').html('');
       for( var i = 0; i < messages.length; i++ ){
+        console.log(messages[i]);
         app.displayMessage(messages[i]);
       }
     },
@@ -168,7 +193,6 @@ app = {
         // data: { order: '-createdAt' },
         contentType: 'application/json',
         success: function(json){
-          // console.log(json);
           var showMessages = JSON.parse(json);
           app.displayMessages(showMessages);
           console.log('successfully loaded');
@@ -191,9 +215,6 @@ app = {
         contentType: 'application/json',
         success: function(json){
           console.log("Successfully sent!")
-          // message.objectId = json.objectId;
-          // console.log(message);
-          // app.displayMessage(message);
         },
         complete: function(){
           app.stopSpinner();
